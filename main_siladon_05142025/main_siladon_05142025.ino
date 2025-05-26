@@ -67,6 +67,7 @@ const long interval = 500;
 int dish = 0;
 
 ///menu select
+int menu_level = 0;
 int current_condition = 1;
 int current_side = 1;
 int current_option = 1;
@@ -172,130 +173,120 @@ void loop() {
   condition_selected = false;
   side_selected = false;
   option_selected = false;
-  
-  // select condition
-  write_i2c(4);
-  while(!condition_selected){
-    if (digitalRead(button_pin[0]) == LOW) {  // Button 1 pressed
-      current_condition++;
-      if(current_condition > max_condition) current_condition = 1;
-      write_i2c(1);
-    }else if (digitalRead(button_pin[1]) == LOW) { // Button 2 pressed
-      current_condition--;
-      if(current_condition < 1) current_condition = max_condition;
-      write_i2c(2);
-    }else if(digitalRead(button_pin[3]) != LOW){
-      Serial.println("condition selected ! : " +String(current_condition));
+
+  // loop for select menu
+  while(menu_level != 3){
+    if(menu_level == 0){
+      condition_selected = false;
+      side_selected = false;
+      option_selected = false;
+    }else if(menu_level == 1){
       condition_selected = true;
-      write_i2c(5);
-    }
-
-    Serial.println("Waiting for press green button...");
-    if(digitalRead(button_pin[2]) == LOW){
-      Serial.println("yellow pressed.");
-      digitalWrite(Relay_LED_Green, HIGH);
-      digitalWrite(Relay_LED_Red, LOW);
-      servoMotor.write(0);// อยู่ตำแหน่งปิด 
-      delay(1500);
-      digitalWrite(Relay_PumpWater, HIGH);
-      digitalWrite(Relay_PumpSp, HIGH);
-      delay(500);
-      write_i2c(6);
-      delay(500);
-      while(digitalRead(button_pin[2]) != LOW){
-        Serial.println("Waiting for stop yellow.");
-      }
-      digitalWrite(Relay_PumpSp, LOW);
-      delay(500);
-      write_i2c(8);
-      digitalWrite(Relay_LED_Green, LOW);
-      digitalWrite(Relay_LED_Red, HIGH);
-    }
-    delay(200);
-  }
-
-  // select side
-  write_i2c(3);
-  while(!side_selected){
-    if (digitalRead(button_pin[0]) == LOW) {  // Button 1 pressed
-      current_side++;
-      if(current_side > max_side) current_side = 1;
-      write_i2c(1);
-    }else if (digitalRead(button_pin[1]) == LOW) { // Button 2 pressed
-      current_side--;
-      if(current_side < 1) current_side = max_side;
-      write_i2c(2);
-    }else if(digitalRead(button_pin[3]) != LOW){
-      Serial.println("side selected ! : " +String(current_side));
+      side_selected = false;
+      option_selected = false;
+    }else if(menu_level == 2){
+      condition_selected = true;
       side_selected = true;
-      write_i2c(5);
-    }
-
-    Serial.println("Waiting for press green button...");
-    if(digitalRead(button_pin[2]) == LOW){
-      Serial.println("yellow pressed.");
-      digitalWrite(Relay_LED_Green, HIGH);
-      digitalWrite(Relay_LED_Red, LOW);
-      servoMotor.write(0);// อยู่ตำแหน่งปิด 
-      delay(1500);
-      digitalWrite(Relay_PumpWater, HIGH);
-      digitalWrite(Relay_PumpSp, HIGH);
-      delay(500);
-      write_i2c(6);
-      delay(500);
-      while(digitalRead(button_pin[2]) != LOW){
-        Serial.println("Waiting for stop yellow.");
-      }
-      digitalWrite(Relay_PumpSp, LOW);
-      delay(500);
-      write_i2c(8);
-      digitalWrite(Relay_LED_Green, LOW);
-      digitalWrite(Relay_LED_Red, HIGH);
-    }
-    delay(200);
-  }
-
-  //select option
-  write_i2c(2);
-  while(!option_selected){
-    if (digitalRead(button_pin[0]) == LOW) {  // Button 1 pressed
-      current_option++;
-      if(current_option > max_option) current_option = 1;
-      write_i2c(1);
-    }else if (digitalRead(button_pin[1]) == LOW) { // Button 2 pressed
-      current_option--;
-      if(current_option < 1) current_option = max_option;
-      write_i2c(2);
-    }else if(digitalRead(button_pin[3]) != LOW){
-      Serial.println("option selected ! : " +String(current_option));
+      option_selected = false;
+    }else if(menu_level == 3){
+      condition_selected = true;
+      side_selected = true;
       option_selected = true;
-      write_i2c(5);
     }
-
-    Serial.println("Waiting for press green button...");
-    if(digitalRead(button_pin[2]) == LOW){
-      Serial.println("yellow pressed.");
-      digitalWrite(Relay_LED_Green, HIGH);
-      digitalWrite(Relay_LED_Red, LOW);
-      servoMotor.write(0);// อยู่ตำแหน่งปิด 
-      delay(1500);
-      digitalWrite(Relay_PumpWater, HIGH);
-      digitalWrite(Relay_PumpSp, HIGH);
-      delay(500);
-      write_i2c(6);
-      delay(500);
-      while(digitalRead(button_pin[2]) != LOW){
-        Serial.println("Waiting for stop yellow.");
+ 
+    // select condition
+    write_i2c(4);
+    while(!condition_selected){
+      if (digitalRead(button_pin[0]) == LOW) {  // Button 1 pressed
+        current_condition++;
+        if(current_condition > max_condition) current_condition = 1;
+        write_i2c(1);
+      }else if (digitalRead(button_pin[1]) == LOW) { // Button 2 pressed
+        current_condition--;
+        if(current_condition < 1) current_condition = max_condition;
+        write_i2c(2);
+      }else if(digitalRead(button_pin[3]) != LOW){
+        Serial.println("condition selected ! : " +String(current_condition));
+        condition_selected = true;
+        menu_level = 1;
+        write_i2c(5);
       }
-      digitalWrite(Relay_PumpSp, LOW);
-      delay(500);
-      write_i2c(8);
-      digitalWrite(Relay_LED_Green, LOW);
-      digitalWrite(Relay_LED_Red, HIGH);
+  
+      // if yellow was pressed then pump on
+      Serial.println("Waiting for press green button...");
+      if(digitalRead(button_pin[2]) == LOW){
+        Serial.println("yellow pressed.");
+        digitalWrite(Relay_LED_Green, HIGH);
+        digitalWrite(Relay_LED_Red, LOW);
+        servoMotor.write(0);// อยู่ตำแหน่งปิด 
+        delay(1500);
+        digitalWrite(Relay_PumpWater, HIGH);
+        digitalWrite(Relay_PumpSp, HIGH);
+        delay(500);
+        write_i2c(6);
+        delay(500);
+        while(digitalRead(button_pin[2]) != LOW){
+          Serial.println("Waiting for stop yellow.");
+        }
+        digitalWrite(Relay_PumpSp, LOW);
+        delay(500);
+        write_i2c(8);
+        digitalWrite(Relay_LED_Green, LOW);
+        digitalWrite(Relay_LED_Red, HIGH);
+      }
+      delay(200);
     }
-    delay(200);
+  
+    // select side
+    write_i2c(3);
+    while(!side_selected){
+      if (digitalRead(button_pin[0]) == LOW) {  // Button 1 pressed
+        current_side++;
+        if(current_side > max_side) current_side = 1;
+        write_i2c(1);
+      }else if (digitalRead(button_pin[1]) == LOW) { // Button 2 pressed
+        current_side--;
+        if(current_side < 1) current_side = max_side;
+        write_i2c(2);
+      }else if(digitalRead(button_pin[3]) != LOW){
+        Serial.println("side selected ! : " +String(current_side));
+        side_selected = true;
+        menu_level = 2;
+        write_i2c(5);
+      }else if(digitalRead(button_pin[2]) == LOW){
+        menu_level = 0;
+        side_selected = true;
+        write_i2c(5);
+      }
+      delay(200);
+    }
+  
+    //select option
+    write_i2c(2);
+    while(!option_selected){
+      if (digitalRead(button_pin[0]) == LOW) {  // Button 1 pressed
+        current_option++;
+        if(current_option > max_option) current_option = 1;
+        write_i2c(1);
+      }else if (digitalRead(button_pin[1]) == LOW) { // Button 2 pressed
+        current_option--;
+        if(current_option < 1) current_option = max_option;
+        write_i2c(2);
+      }else if(digitalRead(button_pin[3]) != LOW){
+        Serial.println("option selected ! : " +String(current_option));
+        menu_level = 3;
+        option_selected = true;
+        write_i2c(5);
+      }else if(digitalRead(button_pin[2]) == LOW){
+        menu_level = 1;
+        option_selected = true;
+        write_i2c(5);
+      }
+      delay(200);
+    }
   }
-
+  // menu selected
+  menu_level -= 1; //setup to previous menu_level for next time 
   
   //เมื่อปุ่มเขียวถูกกดแล้ว
   digitalWrite(Relay_LED_Green, HIGH);
