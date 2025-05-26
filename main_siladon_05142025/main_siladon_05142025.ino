@@ -6,6 +6,23 @@ Servo servoMotor;  // Create a servo object to control a servo motor
 #define SLAVE_ADDR 5
 #define ANSWERSIZE 3
 
+//command i2c for display tft
+// "9" waiting process
+// "8" press button to start
+// "7" press to setup
+// "6" press to stop
+// -----------------------------
+//  (if on the menu)
+// "1" is use for up/down index
+// "2" is use for up/down index
+// "3" is use for confirm index
+// -----------------------------
+//  "4" show condition menu
+//  "3" show side menu
+//  "2" show menu
+//  "5" close all of menu
+
+
 //ปุ่มหน้าจอ
 int button_pin[4] = {22, 26, 28, 24};
 int button_enter = 20;
